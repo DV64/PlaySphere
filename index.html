@@ -1,0 +1,2431 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaySphere Ultimate - Advanced Game Search</title>
+    <style>
+        /* إضافة الخطوط العربية والإنجليزية */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap');
+        
+        :root {
+            --primary: #6d28d9;
+            --primary-dark: #5b21b6;
+            --primary-light: #7c3aed;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --surface-light: #334155;
+            --text: #f8fafc;
+            --text-secondary: #94a3b8;
+            --error: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --accent: #ff4081;
+            --accent-dark: #db2777;
+            --error-light: #ff6b6b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Cairo', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, var(--primary-dark), var(--background) 70%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 1rem;
+            flex: 1;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* ========== Header Section ========== */
+        .site-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2.5rem 1rem;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(51, 65, 85, 0.8));
+            backdrop-filter: blur(10px);
+            border-radius: 0 0 2rem 2rem;
+            box-shadow: 
+                0 4px 20px rgba(0,0,0,0.3),
+                0 0 30px rgba(109, 40, 217, 0.2);
+            animation: slideDown 0.7s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--primary-light), 
+                var(--accent),
+                var(--primary-light), 
+                transparent
+            );
+            animation: shimmer 3s infinite linear;
+        }
+
+        .site-title {
+            font-size: 3rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+            text-shadow: 
+                0 0 10px rgba(109, 40, 217, 0.5),
+                0 0 20px rgba(109, 40, 217, 0.3);
+            background: linear-gradient(to right, var(--primary-light), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titlePulse 3s infinite;
+            transform: perspective(1000px) translateZ(0);
+            transition: transform 0.3s ease;
+        }
+
+        .site-title:hover {
+            transform: perspective(1000px) translateZ(20px);
+        }
+
+        .site-description {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+            opacity: 0.9;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .site-description:hover {
+            opacity: 1;
+            transform: translateY(-2px);
+            color: var(--text);
+        }
+
+        /* ========== Filters Section ========== */
+        .filters-section {
+            width: 100%;
+            background: linear-gradient(145deg, 
+                rgba(30, 41, 59, 0.9), 
+                rgba(51, 65, 85, 0.9)
+            );
+            backdrop-filter: blur(10px);
+            padding: 1.8rem;
+            border-radius: 1.5rem;
+            box-shadow: 
+                0 8px 32px rgba(0,0,0,0.2),
+                0 0 20px rgba(109, 40, 217, 0.1);
+            margin-bottom: 2rem;
+            transform: translateY(0);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filters-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 40px rgba(0,0,0,0.3),
+                0 0 30px rgba(109, 40, 217, 0.2);
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem 1rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .toggle-all-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.2rem;
+            padding: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .filter-group label {
+            cursor: pointer;
+            flex: 1;
+            margin: 0;
+            padding: 0;
+        }
+
+        .filter-label {
+            pointer-events: none;
+        }
+
+        .filter-group::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .filter-group:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px) scale(1.02);
+            border-color: var(--primary);
+        }
+
+        .filter-group:hover::before {
+            transform: translateX(100%);
+        }
+
+        .filter-group input[type="checkbox"] {
+            appearance: none;
+            width: 1.4rem;
+            height: 1.4rem;
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .filter-group input[type="checkbox"]:checked {
+            background: var(--primary);
+            border-color: var(--primary-light);
+            animation: checkmark 0.4s ease-out;
+        }
+
+        .filter-group input[type="checkbox"]:checked::before {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 1rem;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-shadow: 0 0 4px rgba(0,0,0,0.3);
+        }
+
+        /* ========== Search Section ========== */
+        .search-container {
+            width: 100%;
+            background: linear-gradient(165deg, 
+                rgba(30, 41, 59, 0.9), 
+                rgba(51, 65, 85, 0.9)
+            );
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 
+                0 12px 40px rgba(0,0,0,0.25),
+                0 0 30px rgba(109, 40, 217, 0.15);
+            margin-bottom: 2rem;
+            transform: translateY(0);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .search-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                circle at center,
+                rgba(109, 40, 217, 0.1),
+                transparent 70%
+            );
+            animation: rotateGradient 10s linear infinite;
+        }
+
+        .search-wrapper {
+            display: flex;
+            gap: 1.5rem;
+            align-items: stretch;
+            position: relative;
+            z-index: 1;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            font-size: 1.4rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid var(--primary);
+            border-radius: 1.2rem;
+            color: var(--text);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 4px 12px rgba(0,0,0,0.1),
+                0 0 10px rgba(109, 40, 217, 0.1);
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 
+                0 0 0 4px rgba(109, 40, 217, 0.25),
+                0 8px 24px rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.08);
+            transform: scale(1.01);
+            border-color: var(--primary-light);
+        }
+
+        .search-button {
+            padding: 1.5rem 3.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.3rem;
+            color: var(--text);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 4px 15px rgba(109, 40, 217, 0.3),
+                0 0 10px rgba(109, 40, 217, 0.2);
+        }
+
+        .search-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                transparent, 
+                rgba(255,255,255,0.2), 
+                transparent
+            );
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 
+                0 8px 24px rgba(109, 40, 217, 0.4),
+                0 0 15px rgba(109, 40, 217, 0.3);
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+        }
+
+        .search-button:hover::before {
+            transform: translateX(100%);
+        }
+
+        /* ========== Results Section ========== */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1.8rem;
+            background: linear-gradient(to right, 
+                rgba(30, 41, 59, 0.9), 
+                rgba(51, 65, 85, 0.9)
+            );
+            backdrop-filter: blur(10px);
+            border-radius: 1.2rem;
+            box-shadow: 
+                0 4px 15px rgba(0,0,0,0.2),
+                0 0 10px rgba(109, 40, 217, 0.1);
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .results-header:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 20px rgba(0,0,0,0.3),
+                0 0 15px rgba(109, 40, 217, 0.2);
+        }
+
+        .results-grid {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            padding-bottom: 6rem;
+        }
+
+        .game-card {
+            background: linear-gradient(145deg, 
+                rgba(30, 41, 59, 0.9), 
+                rgba(51, 65, 85, 0.9)
+            );
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            animation: cardAppear 0.6s ease-out forwards;
+            box-shadow: 
+                0 8px 24px rgba(0,0,0,0.2),
+                0 0 10px rgba(109, 40, 217, 0.1);
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 12px 32px rgba(0,0,0,0.3),
+                0 0 20px rgba(109, 40, 217, 0.2);
+            border-color: var(--primary);
+        }
+
+        .game-image-container {
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: brightness(0.9);
+        }
+
+        .game-card:hover .game-image {
+            transform: scale(1.1);
+            filter: brightness(1);
+        }
+
+        .game-content {
+            padding: 2rem;
+            position: relative;
+            background: linear-gradient(to top, 
+                rgba(0,0,0,0.95), 
+                rgba(0,0,0,0.7) 50%,
+                transparent
+            );
+            transform: translateY(0);
+            transition: transform 0.4s ease;
+        }
+
+        .game-card:hover .game-content {
+            transform: translateY(-10px);
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-clamp: 2;
+            overflow: hidden;
+            color: white;
+            text-shadow: 
+                2px 2px 4px rgba(0,0,0,0.7),
+                0 0 10px rgba(109, 40, 217, 0.3);
+            transition: color 0.3s ease;
+        }
+
+        .game-card:hover .game-title {
+            color: var(--primary-light);
+        }
+
+        .game-source {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.4rem;
+            border-radius: 999px;
+            background: rgba(109, 40, 217, 0.15);
+            color: var(--primary-light);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: 1px solid rgba(109, 40, 217, 0.2);
+        }
+
+        .game-card:hover .game-source {
+            background: rgba(109, 40, 217, 0.25);
+            transform: scale(1.05);
+            box-shadow: 
+                0 4px 12px rgba(0,0,0,0.3),
+                0 0 10px rgba(109, 40, 217, 0.2);
+        }
+
+        /* ========== Loading Overlay ========== */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(99,102,241,0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            color: var(--primary-light);
+            margin-top: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 500;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            animation: pulse 2s infinite;
+        }
+
+        /* ========== Footer ========== */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to right, var(--surface), var(--surface-light));
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+        }
+
+        .footer-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-info {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-light);
+        }
+
+        .footer-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .footer-links a:hover::after {
+            width: 100%;
+        }
+
+        /* ========== Modals ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.98);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+            overflow-y: auto;
+            padding: 2rem 1rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            background: linear-gradient(165deg, var(--surface), var(--surface-light));
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            max-width: 800px;
+            width: 95%;
+            margin: 2rem auto;
+            position: relative;
+            animation: slideIn 0.3s ease-out forwards;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 24px 48px rgba(0,0,0,0.2);
+            overflow: hidden; 
+            max-height: 90vh; 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            position: relative;
+            flex-shrink: 0; 
+        }
+
+        .modal-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 25%;
+            right: 25%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--primary), transparent);
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 8px rgba(99,102,241,0.3));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary-light), var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .privacy-content, .terms-content {
+            flex: 1; 
+            overflow-y: auto;
+            overflow-x: hidden; 
+            padding: 0 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--surface);
+            margin-right: 0.25rem; 
+        }
+
+        .privacy-content::-webkit-scrollbar, .terms-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .privacy-content::-webkit-scrollbar-track, .terms-content::-webkit-scrollbar-track {
+            background: var(--surface);
+            border-radius: 4px;
+        }
+
+        .privacy-content::-webkit-scrollbar-thumb, .terms-content::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        .privacy-section, .terms-section {
+            margin: 2rem 0;
+            padding: 2rem;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 1.2rem;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            transition: all 0.3s ease;
+            width: 100%; 
+        }
+
+        .privacy-section:hover, .terms-section:hover {
+            background: rgba(99, 102, 241, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-light);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            background: linear-gradient(to right, var(--text), var(--primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+            transform: rotate(90deg);
+            color: var(--primary-light);
+        }
+
+        .modal-close:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.3);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                padding: 1.8rem 1.2rem;
+                margin: 0.5rem;
+                width: 98%;
+                max-height: 95vh; 
+            }
+
+            .modal-title {
+                font-size: 1.6rem;
+            }
+
+            .modal-icon {
+                width: 50px;
+                height: 50px;
+                margin-bottom: 1rem;
+            }
+
+            .privacy-section, .terms-section {
+                padding: 1.2rem;
+                margin: 1.5rem 0;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+            
+            .modal-header {
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+            }
+        }
+
+        /* ========== Animations ========== */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes rotateGradient {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes titlePulse {
+            0% { 
+                text-shadow: 
+                    0 0 10px rgba(109, 40, 217, 0.5),
+                    0 0 20px rgba(109, 40, 217, 0.3);
+            }
+            50% { 
+                text-shadow: 
+                    0 0 15px rgba(109, 40, 217, 0.7),
+                    0 0 30px rgba(109, 40, 217, 0.5);
+            }
+            100% { 
+                text-shadow: 
+                    0 0 10px rgba(109, 40, 217, 0.5),
+                    0 0 20px rgba(109, 40, 217, 0.3);
+            }
+        }
+
+        @keyframes checkmark {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* ========== Responsive Design ========== */
+        @media (max-width: 1400px) {
+            .container {
+                width: 96%;
+                padding: 0.8rem;
+            }
+
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                width: 98%;
+                padding: 0.5rem;
+            }
+
+            .site-title {
+                font-size: 2.5rem;
+            }
+
+            .search-wrapper {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .search-input {
+                width: 100%;
+                font-size: 1.3rem;
+                padding: 1.3rem;
+            }
+
+            .search-button {
+                width: 100%;
+                padding: 1.2rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+
+            .game-image-container {
+                height: 250px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .site-title {
+                font-size: 2.2rem;
+            }
+
+            .site-description {
+                font-size: 1.1rem;
+                padding: 0 1.5rem;
+            }
+
+            .filters-section,
+            .search-container {
+                padding: 1.5rem;
+            }
+
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 1.2rem;
+            }
+
+            .game-card {
+                transform: none !important;
+            }
+
+            .footer-content {
+                padding: 0 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .site-title {
+                font-size: 1.8rem;
+            }
+
+            .site-description {
+                font-size: 1rem;
+                padding: 0 1rem;
+            }
+
+            .filters-section,
+            .search-container {
+                padding: 1rem;
+                border-radius: 1rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                gap: 0.8rem;
+            }
+
+            .filter-group {
+                padding: 0.8rem;
+            }
+
+            .search-input {
+                font-size: 1.2rem;
+                padding: 1rem;
+            }
+
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 1rem;
+                padding-bottom: 5rem;
+            }
+
+            .game-image-container {
+                height: 220px;
+            }
+
+            .game-title {
+                font-size: 1.3rem;
+            }
+
+            .footer {
+                padding: 1rem;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .footer-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .footer-links a {
+                margin: 0 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .site-header {
+                margin-bottom: 1.5rem;
+                padding: 2rem 0.8rem;
+                border-radius: 0 0 1.5rem 1.5rem;
+            }
+
+            .site-title {
+                font-size: 1.6rem;
+            }
+
+            .site-description {
+                font-size: 0.95rem;
+                padding: 0 0.8rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.6rem;
+            }
+
+            .filter-group {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .search-input {
+                font-size: 1.1rem;
+                padding: 0.9rem;
+            }
+
+            .search-button {
+                padding: 1rem;
+                font-size: 1.1rem;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 0.5rem;
+                padding-bottom: 5rem;
+            }
+
+            .game-card {
+                margin: 0;
+            }
+
+            .game-image-container {
+                height: 200px;
+            }
+
+            .game-content {
+                padding: 1.5rem;
+            }
+
+            .game-title {
+                font-size: 1.2rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .game-source {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .site-title {
+                font-size: 1.4rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filter-group {
+                padding: 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            .game-image-container {
+                height: 180px;
+            }
+
+            .game-title {
+                font-size: 1.1rem;
+            }
+
+            .footer-links a {
+                margin: 0 0.5rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* ========== Device-Specific Optimizations ========== */
+        @media (hover: none) {
+            .game-card:hover {
+                transform: none;
+            }
+
+            .search-button:hover {
+                transform: none;
+            }
+
+            .filter-group:hover {
+                transform: none;
+            }
+        }
+
+        @supports (-webkit-touch-callout: none) {
+            /* iOS-specific styles */
+            .search-input,
+            .search-button {
+                -webkit-appearance: none;
+                appearance: none;
+            }
+
+            .game-card {
+                -webkit-transform: translateZ(0);
+                transform: translateZ(0);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        @media screen and (orientation: landscape) and (max-height: 500px) {
+            .site-header {
+                padding: 1rem;
+            }
+
+            .site-title {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .site-description {
+                font-size: 0.9rem;
+            }
+
+            .game-image-container {
+                height: 160px;
+            }
+
+            .footer {
+                position: static;
+            }
+
+            .results-grid {
+                padding-bottom: 1rem;
+            }
+        }
+
+        /* ========== High-DPI Screens ========== */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .game-image {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+        }
+
+        /* ========== Print Styles ========== */
+        @media print {
+            .filters-section,
+            .search-container,
+            .footer {
+                display: none !important;
+            }
+
+            .game-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            body {
+                background: none !important;
+                color: #000 !important;
+            }
+
+            .game-title {
+                color: #000 !important;
+                text-shadow: none !important;
+            }
+        }
+
+        /* RTL Support */
+        [dir="rtl"] .footer-content {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .footer-links {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .search-input {
+            text-align: right;
+        }
+
+        [dir="rtl"] .game-title {
+            text-align: right;
+        }
+
+        [dir="rtl"] .filter-group {
+            flex-direction: row-reverse;
+        }
+
+        /* إضافة أنماط زر تغيير اللغة */
+        .language-switch {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 1rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 4px 12px rgba(0,0,0,0.1),
+                0 0 0 2px rgba(255,255,255,0.1) inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .language-switch:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 16px rgba(0,0,0,0.2),
+                0 0 0 2px rgba(255,255,255,0.2) inset;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+        }
+
+        .language-switch:active {
+            transform: translateY(0);
+            box-shadow: 
+                0 2px 8px rgba(0,0,0,0.1),
+                0 0 0 2px rgba(255,255,255,0.1) inset;
+        }
+
+        .language-switch .icon {
+            font-size: 1.2rem;
+            line-height: 1;
+            transition: transform 0.3s ease;
+        }
+
+        .language-switch:hover .icon {
+            transform: rotate(180deg);
+        }
+
+        .language-switch .lang-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .language-switch::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                transparent, 
+                rgba(255,255,255,0.1), 
+                transparent
+            );
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .language-switch:hover::before {
+            transform: translateX(100%);
+        }
+
+        /* تحسين موقع الزر في التذييل */
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        /* تحسينات للهاتف المحمول */
+        @media (max-width: 768px) {
+            .language-switch {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .language-switch .icon {
+                font-size: 1rem;
+            }
+        }
+
+        /* تحسين التباعد في وضع RTL */
+        [dir="rtl"] .language-switch {
+            margin-right: 0.5rem;
+        }
+
+        [dir="ltr"] .language-switch {
+            margin-left: 0.5rem;
+        }
+
+        /* تحسين أنماط رسائل الخطأ */
+        .error-state {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            min-width: 300px;
+            max-width: 600px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--error-light), var(--error));
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            z-index: 9999;
+            opacity: 0;
+            animation: slideInDown 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .error-state.hide {
+            animation: slideOutUp 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        .error-state:hover {
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .error-state h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: fadeInDown 0.3s ease 0.2s forwards;
+        }
+
+        .error-state p {
+            margin: 0;
+            font-size: 0.95rem;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.3s ease 0.3s forwards;
+        }
+
+        .error-state::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            transform-origin: left;
+            animation: countdown 5s linear forwards;
+        }
+
+        @keyframes slideInDown {
+            0% {
+                transform: translateX(-50%) translateY(-100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutUp {
+            0% {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-50%) translateY(-100%);
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes countdown {
+            from {
+                width: 100%;
+            }
+            to {
+                width: 0%;
+            }
+        }
+
+        [dir="rtl"] .error-state::before {
+            right: 0;
+            left: auto;
+            transform-origin: right;
+            animation: countdown-rtl 5s linear forwards;
+        }
+
+        @keyframes countdown-rtl {
+            from {
+                width: 100%;
+                right: 0;
+            }
+            to {
+                width: 0%;
+                right: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <div class="filters-header" style="display: flex; justify-content: space-between; align-items: center; padding: 0 1rem 1rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <h3 style="color: var(--text); font-size: 1.2rem;">Select Game Sources</h3>
+                <button id="toggleAllFilters" class="toggle-all-button" style="background: var(--primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.3s ease;">
+                    Deselect All
+                </button>
+            </div>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-fitgirl" checked>
+                    <label for="filter-fitgirl" class="filter-label">FitGirl</label>
+                </div>
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-gametrex" checked>
+                    <label for="filter-gametrex" class="filter-label">GameTrex</label>
+                </div>
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-igg" checked>
+                    <label for="filter-igg" class="filter-label">IGG Games</label>
+                </div>
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-ocean" checked>
+                    <label for="filter-ocean" class="filter-label">Ocean Games</label>
+                </div>
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-mechanics" checked>
+                    <label for="filter-mechanics" class="filter-label">Mechanics</label>
+                </div>
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-pcgames" checked>
+                    <label for="filter-pcgames" class="filter-label">PC Torrents</label>
+                </div>
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-skidrow" checked>
+                    <label for="filter-skidrow" class="filter-label">Skidrow</label>
+                </div>
+                
+                <!-- المواقع الجديدة -->
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-myabandonware" checked>
+                    <label for="filter-myabandonware" class="filter-label">My Abandonware</label>
+                </div>
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-megagames" checked>
+                    <label for="filter-megagames" class="filter-label">MegaGames</label>
+                </div>
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-apunkagames" checked>
+                    <label for="filter-apunkagames" class="filter-label">ApunKaGames</label>
+                </div>
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-blackbox" checked>
+                    <label for="filter-blackbox" class="filter-label">BlackBox Repack</label>
+                </div>
+                <!-- المواقع الثلاثة الجديدة -->
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-directforgames" checked>
+                    <label for="filter-directforgames" class="filter-label">Direct For Games</label>
+                </div>
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-wifi4games" checked>
+                    <label for="filter-wifi4games" class="filter-label">WIFI4Games</label>
+                </div>
+                <div class="filter-group">
+                    <input type="checkbox" id="filter-downloadcomputergames" checked>
+                    <label for="filter-downloadcomputergames" class="filter-label">Download Computer Games</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-container">
+            <div class="search-wrapper">
+                <input
+                    type="search"
+                    class="search-input"
+                    placeholder="Search across 8+ game repositories..."
+                    id="searchInput"
+                    aria-label="Game search input"
+                >
+                <button class="search-button" id="searchButton">
+                    🔍 Start Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <main id="results">
+            <div class="results-header">
+                <h2 id="resultsCount">🎮 0 Games Found</h2>
+                <select class="sort-select" id="sortSelect">
+                    <option value="title">Sort by Title</option>
+                    <option value="source">Sort by Source</option>
+                    <option value="date">Sort by Date</option>
+                </select>
+            </div>
+            <div class="results-grid"></div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <span>© 2025 PlaySphere</span>
+                <span>V1.0.0</span>
+                <span>Powered by DV64</span>
+            </div>
+            <div class="footer-links">
+                <a href="#privacyModal">Privacy Policy</a>
+                <a href="#termsModal">Terms of Service</a>
+                <button class="language-switch" onclick="toggleLanguage()">
+                    <span class="icon">🌐</span>
+                    <span class="lang-text">English</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Searching in progress...</div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div id="privacyModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Close window">&times;</button>
+            <div class="modal-header">
+                <img src="assets/privacy_shield.png" alt="Privacy Shield" class="modal-icon">
+                <h2 class="modal-title" data-ar="🔒 سياسة الخصوصية" data-en="🔒 Comprehensive Privacy Policy">🔒 Comprehensive Privacy Policy</h2>
+            </div>
+    
+            <div class="privacy-content">
+                <!-- Section 1: Introduction -->
+                <section class="privacy-section">
+                    <div class="section-header">
+                        <span class="section-icon">🛡️</span>
+                        <h3 class="section-title" data-ar="مقدمة" data-en="Introduction">Introduction</h3>
+                    </div>
+                    <p class="translatable" data-ar="في <strong>بلاي سفير</strong>، خصوصيتك هي أولويتنا القصوى. نحن ملتزمون بحماية بياناتك الشخصية وتوفير تجربة آمنة وموثوقة. توضح هذه السياسة كيفية جمع واستخدام وحماية معلوماتك عند استخدامك لخدماتنا." data-en="At <strong>PlaySphere</strong>, your privacy is our top priority. We are committed to protecting your personal data and providing a safe and reliable experience. This policy explains how we collect, use, and protect your information when you use our services.">
+                        في <strong>بلاي سفير</strong>، خصوصيتك هي أولويتنا القصوى. نحن ملتزمون بحماية بياناتك الشخصية وتوفير تجربة آمنة وموثوقة. توضح هذه السياسة كيفية جمع واستخدام وحماية معلوماتك عند استخدامك لخدماتنا.
+                    </p>
+                </section>
+    
+                <!-- Section 2: Data Collection -->
+                <section class="privacy-section">
+                    <div class="section-header">
+                        <span class="section-icon">📦</span>
+                        <h3 class="section-title" data-ar="المعلومات التي نجمعها" data-en="Information We Collect">Information We Collect</h3>
+                    </div>
+                    <p class="translatable" data-ar="نقوم بجمع أنواع مختلفة من المعلومات لتحسين خدماتنا:" data-en="We collect different types of information to improve our services:">
+                        نقوم بجمع أنواع مختلفة من المعلومات لتحسين خدماتنا:
+                    </p>
+                    <ul class="translatable-list" data-list-id="privacy-basic-info">
+                        <li><strong>المعلومات التقنية:</strong> عنوان IP ونوع المتصفح وإصداره.</li>
+                        <li><strong>معلومات الاستخدام:</strong> الصفحات التي تمت زيارتها ومدة الجلسة.</li>
+                    </ul>
+                </section>
+    
+                <!-- Section 3: Data Sharing -->
+                <section class="privacy-section">
+                    <div class="section-header">
+                        <span class="section-icon">🤝</span>
+                        <h3 class="section-title" data-ar="مشاركة البيانات" data-en="Data Sharing">Data Sharing</h3>
+                    </div>
+                    <p class="translatable" data-ar="نحن لا نشارك معلوماتك الشخصية مع أطراف ثالثة إلا في الحالات التالية:" data-en="We do not share your personal information with third parties except in the following cases:">
+                        نحن لا نشارك معلوماتك الشخصية مع أطراف ثالثة إلا في الحالات التالية:
+                    </p>
+                    <ul class="translatable-list" data-list-id="privacy-data-sharing">
+                        <li>عندما يكون ذلك مطلوباً بموجب القانون.</li>
+                        <li>لحماية حقوقنا وسلامتنا.</li>
+                        <li>مع مقدمي الخدمات الموثوق بهم الذين يساعدوننا في تشغيل خدماتنا.</li>
+                    </ul>
+                </section>
+    
+                <!-- Section 4: Cookies -->
+                <section class="privacy-section">
+                    <div class="section-header">
+                        <span class="section-icon">🍪</span>
+                        <h3 class="section-title" data-ar="ملفات تعريف الارتباط" data-en="Cookies">Cookies</h3>
+                    </div>
+                    <p class="translatable" data-ar="نحن نستخدم ملفات تعريف الارتباط الضرورية فقط لضمان الوظائف الأساسية لموقعنا. نحن لا نستخدم ملفات تعريف الارتباط للتتبع أو الإعلانات." data-en="We only use essential cookies to ensure the basic functionality of our website. We do not use cookies for tracking or advertising.">
+                        نحن نستخدم ملفات تعريف الارتباط الضرورية فقط لضمان الوظائف الأساسية لموقعنا. نحن لا نستخدم ملفات تعريف الارتباط للتتبع أو الإعلانات.
+                    </p>
+                </section>
+    
+                <!-- Section 5: Changes to this Policy -->
+                <section class="privacy-section">
+                    <div class="section-header">
+                        <span class="section-icon">🔄</span>
+                        <h3 class="section-title" data-ar="التغييرات في هذه السياسة" data-en="Changes to this Policy">Changes to this Policy</h3>
+                    </div>
+                    <p class="translatable" data-ar="قد نقوم بتحديث هذه السياسة من وقت لآخر. سنقوم بإعلامك بأي تغييرات جوهرية عن طريق نشر السياسة الجديدة على موقعنا." data-en="We may update this policy from time to time. We will notify you of any significant changes by posting the new policy on our website.">
+                        قد نقوم بتحديث هذه السياسة من وقت لآخر. سنقوم بإعلامك بأي تغييرات جوهرية عن طريق نشر السياسة الجديدة على موقعنا.
+                    </p>
+                </section>
+    
+                <!-- Section 6: Contact Us -->
+                <section class="privacy-section">
+                    <div class="section-header">
+                        <span class="section-icon">✉️</span>
+                        <h3 class="section-title" data-ar="اتصل بنا" data-en="Contact Us">Contact Us</h3>
+                    </div>
+                    <p class="translatable" data-ar="إذا كانت لديك أي أسئلة حول هذه السياسة، يرجى الاتصال بنا على: <a href='mailto:privacy@playsphere.com'>privacy@playsphere.com</a>" data-en="If you have any questions about this policy, please contact us at: <a href='mailto:privacy@playsphere.com'>privacy@playsphere.com</a>">
+                        إذا كانت لديك أي أسئلة حول هذه السياسة، يرجى الاتصال بنا على: <a href="mailto:privacy@playsphere.com">privacy@playsphere.com</a>
+                    </p>
+                </section>
+            </div>
+    
+        </div>
+    </div>
+    
+    <!-- Terms of Service Modal -->
+    <div id="termsModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Close window">&times;</button>
+            <div class="modal-header">
+                <img src="assets/terms.png" alt="Terms Icon" class="modal-icon">
+                <h2 class="modal-title" data-ar="📜 شروط الخدمة" data-en="📜 Comprehensive Terms of Service">📜 Comprehensive Terms of Service</h2>
+            </div>
+    
+            <div class="terms-content">
+                <!-- Section 1: Introduction -->
+                <section class="terms-section">
+                    <div class="section-header">
+                        <span class="section-icon">📜</span>
+                        <h3 class="section-title" data-ar="مقدمة عامة" data-en="General Introduction">General Introduction</h3>
+                    </div>
+                    <p class="terms-text translatable" data-ar="تشكل هذه الشروط اتفاقية ملزمة بينك ('المستخدم') وبلاي سفير. يرجى القراءة بعناية قبل استخدام خدمتنا." data-en="These terms form a binding agreement between you ('User') and PlaySphere. Please read carefully before using our service.">
+                        تشكل هذه الشروط اتفاقية ملزمة بينك ("المستخدم") وبلاي سفير. يرجى القراءة بعناية قبل استخدام خدمتنا.
+                    </p>
+                </section>
+    
+                <!-- Section 2: User Responsibilities -->
+                <section class="terms-section">
+                    <div class="section-header">
+                        <span class="section-icon">👤</span>
+                        <h3 class="section-title" data-ar="مسؤوليات المستخدم" data-en="User Responsibilities">User Responsibilities</h3>
+                    </div>
+                    <p class="terms-text translatable" data-ar="أنت مسؤول عن:" data-en="You are responsible for:">
+                        أنت مسؤول عن:
+                    </p>
+                    <ul class="translatable-list" data-list-id="terms-user-responsibilities">
+                        <li>استخدام المحتوى الذي نوفره للأغراض الشخصية وغير التجارية فقط.</li>
+                        <li>الامتثال لجميع القوانين المحلية والدولية المعمول بها.</li>
+                    </ul>
+                </section>
+    
+                <!-- Section 3: Property Rights -->
+                <section class="terms-section">
+                    <div class="section-header">
+                        <span class="section-icon">©️</span>
+                        <h3 class="section-title" data-ar="حقوق الملكية" data-en="Property Rights">Property Rights</h3>
+                    </div>
+                    <p class="terms-text translatable" data-ar="جميع العلامات التجارية والشعارات وأسماء المنتجات المعروضة على خدمتنا هي ملك لأصحابها القانونيين. نحن لا ندعي أي ملكية لهذه العلامات التجارية." data-en="All trademarks, logos, and product names displayed on our service are the property of their respective owners. We do not claim ownership of these trademarks.">
+                        جميع العلامات التجارية والشعارات وأسماء المنتجات المعروضة على خدمتنا هي ملك لأصحابها القانونيين. نحن لا ندعي أي ملكية لهذه العلامات التجارية.
+                    </p>
+                </section>
+    
+                <!-- Section 4: Third-Party Content -->
+                <section class="terms-section">
+                    <div class="section-header">
+                        <span class="section-icon">🌐</span>
+                        <h3 class="section-title" data-ar="محتوى الطرف الثالث" data-en="Third-Party Content">Third-Party Content</h3>
+                    </div>
+                    <p class="terms-text translatable" data-ar="قد تحتوي خدمتنا على روابط لمواقع ويب أو خدمات تابعة لجهات خارجية. نحن لسنا مسؤولين عن محتوى أو ممارسات الخصوصية لهذه المواقع أو الخدمات." data-en="Our service may contain links to third-party websites or services. We are not responsible for the content or privacy practices of these websites or services.">
+                        قد تحتوي خدمتنا على روابط لمواقع ويب أو خدمات تابعة لجهات خارجية. نحن لسنا مسؤولين عن محتوى أو ممارسات الخصوصية لهذه المواقع أو الخدمات.
+                    </p>
+                </section>
+    
+                <!-- Section 5: Disclaimer -->
+                <section class="terms-section">
+                    <div class="section-header">
+                        <span class="section-icon">❗</span>
+                        <h3 class="section-title" data-ar="إخلاء المسؤولية" data-en="Disclaimer">Disclaimer</h3>
+                    </div>
+                    <p class="terms-text translatable" data-ar="يتم توفير خدمتنا 'كما هي' و 'كما هي متاحة' دون أي ضمانات من أي نوع، صريحة أو ضمنية. نحن لا نضمن أن خدمتنا ستكون خالية من الأخطاء أو متوفرة بشكل مستمر." data-en="Our service is provided 'as is' and 'as available' without any warranties of any kind, express or implied. We do not guarantee that our service will be error-free or continuously available.">
+                        يتم توفير خدمتنا "كما هي" و "كما هي متاحة" دون أي ضمانات من أي نوع، صريحة أو ضمنية. نحن لا نضمن أن خدمتنا ستكون خالية من الأخطاء أو متوفرة بشكل مستمر.
+                    </p>
+                </section>
+    
+                <!-- Section 6: Liability Limitations -->
+                <section class="terms-section">
+                    <div class="section-header">
+                        <span class="section-icon">⚖️</span>
+                        <h3 class="section-title" data-ar="حدود المسؤولية" data-en="Liability Limitations">Liability Limitations</h3>
+                    </div>
+                    <p class="terms-text translatable" data-ar="لن نكون مسؤولين عن أي أضرار مباشرة أو غير مباشرة أو عرضية أو خاصة أو تبعية تنشأ عن استخدامك لخدمتنا." data-en="We will not be liable for any direct, indirect, incidental, special, or consequential damages arising from your use of our service.">
+                        لن نكون مسؤولين عن أي أضرار مباشرة أو غير مباشرة أو عرضية أو خاصة أو تبعية تنشأ عن استخدامك لخدمتنا.
+                    </p>
+                </section>
+    
+                <!-- Section 7: Changes to Terms -->
+                <section class="terms-section">
+                    <div class="section-header">
+                        <span class="section-icon">🔄</span>
+                        <h3 class="section-title" data-ar="التغييرات في هذه الشروط" data-en="Changes to Terms">Changes to Terms</h3>
+                    </div>
+                    <p class="terms-text translatable" data-ar="نحتفظ بالحق في تعديل هذه الشروط في أي وقت. سنقوم بإعلامك بأي تغييرات جوهرية عن طريق نشر الشروط الجديدة على موقعنا." data-en="We reserve the right to modify these terms at any time. We will notify you of any significant changes by posting the new terms on our website.">
+                        نحتفظ بالحق في تعديل هذه الشروط في أي وقت. سنقوم بإعلامك بأي تغييرات جوهرية عن طريق نشر الشروط الجديدة على موقعنا.
+                    </p>
+                </section>
+    
+                <!-- Section 8: Termination -->
+                <section class="terms-section">
+                    <div class="section-header">
+                        <span class="section-icon">🛑</span>
+                        <h3 class="section-title" data-ar="الإنهاء" data-en="Termination">Termination</h3>
+                    </div>
+                    <p class="terms-text translatable" data-ar="يجوز لنا إنهاء أو تعليق وصولك إلى خدمتنا على الفور، دون إشعار مسبق أو مسؤولية، لأي سبب من الأسباب، بما في ذلك، على سبيل المثال لا الحصر، إذا انتهكت هذه الشروط." data-en="We may terminate or suspend your access to our service immediately, without prior notice or liability, for any reason whatsoever, including, without limitation, if you breach these terms.">
+                        يجوز لنا إنهاء أو تعليق وصولك إلى خدمتنا على الفور، دون إشعار مسبق أو مسؤولية، لأي سبب من الأسباب، بما في ذلك، على سبيل المثال لا الحصر، إذا انتهكت هذه الشروط.
+                    </p>
+                </section>
+    
+                <!-- Section 10: Contact Us -->
+                <section class="terms-section">
+                    <div class="section-header">
+                        <span class="section-icon">✉️</span>
+                        <h3 class="section-title" data-ar="اتصل بنا" data-en="Contact Us">Contact Us</h3>
+                    </div>
+                    <p class="terms-text translatable" data-ar="إذا كانت لديك أي أسئلة حول هذه الشروط، يرجى الاتصال بنا على: <a href='mailto:terms@playsphere.com'>terms@playsphere.com</a>" data-en="If you have any questions about these terms, please contact us at: <a href='mailto:terms@playsphere.com'>terms@playsphere.com</a>">
+                        إذا كانت لديك أي أسئلة حول هذه الشروط، يرجى الاتصال بنا على: <a href="mailto:terms@playsphere.com">terms@playsphere.com</a>
+                    </p>
+                </section>
+            </div>
+    
+        </div>
+    </div>
+    
+    <script>
+        const DOM = {
+            searchInput: document.getElementById('searchInput'),
+            searchButton: document.getElementById('searchButton'),
+            results: document.getElementById('results'),
+            resultsCount: document.getElementById('resultsCount'),
+            sortSelect: document.getElementById('sortSelect'),
+            loading: document.getElementById('loading'),
+            resultsHeader: document.querySelector('.results-header'),
+            resultsGrid: document.querySelector('.results-grid'),
+            toggleAllButton: document.getElementById('toggleAllFilters'),
+            filters: {
+                fitgirl: document.getElementById('filter-fitgirl'),
+                gametrex: document.getElementById('filter-gametrex'),
+                igg: document.getElementById('filter-igg'),
+                ocean: document.getElementById('filter-ocean'),
+                mechanics: document.getElementById('filter-mechanics'),
+                pcgames: document.getElementById('filter-pcgames'),
+                skidrow: document.getElementById('filter-skidrow'),
+                myabandonware: document.getElementById('filter-myabandonware'),
+                megagames: document.getElementById('filter-megagames'),
+                apunkagames: document.getElementById('filter-apunkagames'),
+                blackbox: document.getElementById('filter-blackbox'),
+                directforgames: document.getElementById('filter-directforgames'),
+                wifi4games: document.getElementById('filter-wifi4games'),
+                downloadcomputergames: document.getElementById('filter-downloadcomputergames')
+            }
+        };
+
+        // Event Listeners
+        DOM.searchButton.addEventListener('click', () => {
+            if (getActiveSources().length > 0) {
+                executeSearch();
+            } else {
+                showErrorMessage('Please select at least one game source');
+            }
+        });
+        
+        DOM.searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (getActiveSources().length > 0) {
+                    executeSearch();
+                } else {
+                    showErrorMessage('Please select at least one game source');
+                }
+            }
+        });
+
+        DOM.sortSelect.addEventListener('change', handleSorting);
+
+        // Modal Management
+        const modals = {
+            privacyModal: document.getElementById('privacyModal'),
+            termsModal: document.getElementById('termsModal')
+        };
+
+        document.querySelectorAll('.footer-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const modalId = link.getAttribute('href').replace('#', '');
+                if (modals[modalId]) {
+                    showModal(modalId);
+                }
+            });
+        });
+
+        document.querySelectorAll('.modal-close').forEach(button => {
+            button.addEventListener('click', () => {
+                hideAllModals();
+            });
+        });
+
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    hideAllModals();
+                }
+            });
+        });
+
+        function showModal(type) {
+            hideAllModals();
+            if (modals[type]) {
+                document.body.style.overflow = 'hidden';
+                modals[type].style.display = 'flex';
+                
+                // Get references to modal content elements
+                const modalContent = modals[type].querySelector('.modal-content');
+                const modalHeader = modalContent.querySelector('.modal-header');
+                const contentContainer = modalContent.querySelector('.privacy-content, .terms-content');
+                
+                // Adjust modal size to fit screen
+                function adjustModalSize() {
+                    if (!modalContent || !contentContainer) return;
+                    
+                    // Calculate available height based on window and header sizes
+                    const windowHeight = window.innerHeight;
+                    const headerHeight = modalHeader ? modalHeader.offsetHeight : 0;
+                    const padding = parseInt(getComputedStyle(modalContent).padding) * 2;
+                    const margin = parseInt(getComputedStyle(modalContent).margin) * 2;
+                    
+                    // Calculate available height for content
+                    const availableHeight = windowHeight - headerHeight - padding - margin;
+                    
+                    // Apply calculated height with maximum limit
+                    contentContainer.style.maxHeight = `${Math.min(availableHeight, windowHeight * 0.7)}px`;
+                }
+                
+                // Adjust modal size on opening
+                adjustModalSize();
+                
+                // Add resize event listener
+                window.addEventListener('resize', adjustModalSize);
+                
+                // Store reference to listener for cleanup
+                modals[type].adjustModalSize = adjustModalSize;
+            }
+        }
+
+        function hideAllModals() {
+            document.body.style.overflow = '';
+            Object.values(modals).forEach(modal => {
+                modal.style.display = 'none';
+                
+                // Remove resize event listener when closing modal
+                if (modal.adjustModalSize) {
+                    window.removeEventListener('resize', modal.adjustModalSize);
+                    modal.adjustModalSize = null;
+                }
+            });
+        }
+
+        // Search Functionality
+        async function executeSearch() {
+            const query = DOM.searchInput.value.trim();
+            if (!query) {
+                showErrorMessage('Please enter a search query');
+                return;
+            }
+
+            try {
+                DOM.loading.style.display = 'flex';
+                const activeSources = getActiveSources();
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 120000);
+                
+                const response = await fetch(`/search?q=${encodeURIComponent(query)}&sources=${activeSources}`, {
+                    signal: controller.signal,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Add any headers required for the server
+                    }
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Unknown error');
+                }
+                
+                const data = await response.json();
+                
+                if (!data.results || !Array.isArray(data.results)) {
+                    throw new Error('Invalid response format');
+                }
+                
+                sessionStorage.setItem('lastResults', JSON.stringify(data.results));
+                renderGameResults(data);
+                
+            } catch (error) {
+                const errorMessage = error.message.includes('aborted') ? 
+                    'Request timed out (120s)' : 
+                    error.message || 'Failed to fetch results';
+                
+                showErrorMessage(errorMessage);
+                console.error('Search Error:', error);
+                
+            } finally {
+                DOM.loading.style.display = 'none';
+            }
+        }
+
+        function createGameCard(game) {
+            const title = currentLang === 'ar' ? game.title_ar || game.title : game.title;
+            const sourceLabel = currentLang === 'ar' ? 'المصدر: ' : 'Source: ';
+            const imageAlt = currentLang === 'ar' ? `صورة لعبة ${title}` : `${title} game image`;
+            const fallbackText = currentLang === 'ar' ? 'صورة اللعبة غير متوفرة' : 'Game image not available';
+            
+            return `
+                <article class="game-card" data-url="${game.url}">
+                    <div class="game-image-container">
+                        <img src="${optimizeImage(game.image)}"
+                             alt="${imageAlt}"
+                             class="game-image"
+                             loading="lazy"
+                             decoding="async"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="image-fallback" style="display: none;">
+                            ${fallbackText}
+                        </div>
+                    </div>
+                    <div class="game-content">
+                        <h3 class="game-title">${title}</h3>
+                        <div class="game-details">
+                            <span class="game-source">${sourceLabel}${game.source}</span>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
+
+        function renderGameResults(data) {
+            const results = data.results || [];
+            DOM.resultsHeader.style.display = 'flex';
+            DOM.resultsCount.textContent = `🎮 ${results.length} Games Found`;
+
+            const sortedResults = sortResults(results);
+            DOM.resultsGrid.innerHTML = sortedResults.map(game => createGameCard(game)).join('');
+            addCardInteractivity();
+        }
+
+        function getActiveSources() {
+            return Object.entries(DOM.filters)
+                .filter(([_, checkbox]) => checkbox.checked)
+                .map(([key, _]) => key)
+                .join(',');
+        }
+
+        function sortResults(results) {
+            return [...results].sort((a, b) => {
+                switch(DOM.sortSelect.value) {
+                    case 'title': return a.title.localeCompare(b.title);
+                    case 'source': return a.source.localeCompare(b.source);
+                    case 'date': return new Date(b.date) - new Date(a.date);
+                    default: return 0;
+                }
+            });
+        }
+
+        function optimizeImage(url) {
+            return url?.replace('http://', 'https://') + '?w=600&h=400&fit=crop' || 'https://placehold.co/600x400?text=Game+Art';
+        }
+
+        function addCardInteractivity() {
+            document.querySelectorAll('.game-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    window.open(card.dataset.url, '_blank', 'noopener,noreferrer');
+                });
+            });
+        }
+
+        function handleSorting() {
+            const lastResults = JSON.parse(sessionStorage.getItem('lastResults') || '[]');
+            renderGameResults({ results: lastResults });
+        }
+
+        function showErrorMessage(message) {
+            const errorState = document.createElement('div');
+            errorState.className = 'error-state';
+            
+            const title = document.createElement('h3');
+            title.style.fontSize = '1.4rem';
+            title.style.marginBottom = '8px';
+            title.textContent = currentLang === 'ar' ? '⚠️ خطأ' : '⚠️ Error';
+            
+            const text = document.createElement('p');
+            text.style.fontSize = '1.1rem';
+            text.style.margin = '0';
+            text.textContent = message;
+            
+            errorState.appendChild(title);
+            errorState.appendChild(text);
+            
+            // Add auto-hide timer after 5 seconds
+            setTimeout(() => {
+                errorState.classList.add('hide');
+                setTimeout(() => errorState.remove(), 300);
+            }, 5000);
+            
+            // Add click-to-dismiss functionality
+            errorState.addEventListener('click', () => {
+                errorState.classList.add('hide');
+                setTimeout(() => errorState.remove(), 300);
+            });
+            
+            document.body.appendChild(errorState);
+        }
+
+        function updateResultsCount(count) {
+            if (DOM.resultsCount) {
+                DOM.resultsCount.textContent = currentLang === 'ar' ? 
+                    `🎮 تم العثور على ${count} لعبة` : 
+                    `🎮 ${count} Games Found`;
+            }
+        }
+
+        function showLoadingState() {
+            const loadingText = currentLang === 'ar' ? 'جاري البحث...' : 'Searching in progress...';
+            DOM.loading.style.display = 'flex';
+            document.querySelector('.loading-text').textContent = loadingText;
+        }
+
+        function hideLoadingState() {
+            DOM.loading.style.display = 'none';
+        }
+
+        // Update texts when language changes
+        function updateDynamicTexts() {
+            // Update search input placeholder
+            const searchPlaceholder = currentLang === 'ar' ? 
+                'ابحث عن الألعاب في جميع المواقع...' : 
+                'Search across all game repositories...';
+            DOM.searchInput.placeholder = searchPlaceholder;
+
+            // Update search button text
+            const searchButtonText = currentLang === 'ar' ? '🔍 ابدأ البحث' : '🔍 Start Search';
+            DOM.searchButton.textContent = searchButtonText;
+
+            // Update select/deselect all button text
+            const toggleButtonText = Object.values(DOM.filters).every(checkbox => checkbox.checked) ?
+                (currentLang === 'ar' ? 'إلغاء تحديد الكل' : 'Deselect All') :
+                (currentLang === 'ar' ? 'تحديد الكل' : 'Select All');
+            DOM.toggleAllButton.textContent = toggleButtonText;
+
+            // Update sort options
+            const sortOptions = {
+                title: currentLang === 'ar' ? 'ترتيب حسب العنوان' : 'Sort by Title',
+                source: currentLang === 'ar' ? 'ترتيب حسب المصدر' : 'Sort by Source',
+                date: currentLang === 'ar' ? 'ترتيب حسب التاريخ' : 'Sort by Date'
+            };
+            
+            Array.from(DOM.sortSelect.options).forEach(option => {
+                option.text = sortOptions[option.value];
+            });
+
+            // If there are results, update their count
+            const resultsCountText = DOM.resultsCount.textContent;
+            if (resultsCountText) {
+                const count = resultsCountText.match(/\d+/);
+                if (count) {
+                    updateResultsCount(count[0]);
+                }
+            }
+        }
+
+        // Update texts when language changes
+        function toggleLanguage() {
+            const html = document.documentElement;
+            const langBtn = document.querySelector('.language-switch .lang-text');
+            
+            if (currentLang === 'ar') {
+                currentLang = 'en';
+                html.setAttribute('lang', 'en');
+                html.setAttribute('dir', 'ltr');
+                langBtn.textContent = 'عربي';
+                document.body.style.fontFamily = 'Roboto, system-ui, -apple-system, sans-serif';
+            } else {
+                currentLang = 'ar';
+                html.setAttribute('lang', 'ar');
+                html.setAttribute('dir', 'rtl');
+                langBtn.textContent = 'English';
+                document.body.style.fontFamily = 'Cairo, system-ui, -apple-system, sans-serif';
+            }
+            
+            updateTextDirection();
+            loadTranslations();
+            updateDynamicTexts();
+            updateModalContent();
+            
+            localStorage.setItem('preferredLanguage', currentLang);
+            
+            // Reload results if they exist
+            const lastResults = JSON.parse(sessionStorage.getItem('lastResults') || '[]');
+            if (lastResults.length > 0) {
+                renderGameResults({ results: lastResults });
+            }
+        }
+
+        // Update toggle all button state
+        function updateToggleAllButton() {
+            const allChecked = Object.values(DOM.filters).every(checkbox => checkbox.checked);
+            DOM.toggleAllButton.textContent = allChecked ? 'Deselect All' : 'Select All';
+            DOM.toggleAllButton.style.background = allChecked ? 'var(--primary)' : 'var(--primary-dark)';
+        }
+
+        // Add click listener for toggle all button
+        DOM.toggleAllButton.addEventListener('click', () => {
+            const allChecked = Object.values(DOM.filters).every(checkbox => checkbox.checked);
+            Object.values(DOM.filters).forEach(checkbox => {
+                checkbox.checked = !allChecked;
+            });
+            updateToggleAllButton();
+        });
+
+        // Add change listener for each checkbox
+        Object.values(DOM.filters).forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                updateToggleAllButton();
+            });
+        });
+
+        // Initialize
+        document.querySelector('.results-header').style.display = 'none';
+
+        document.getElementById('filter-blackbox').addEventListener('change', function() {
+            filterResults('BlackBox Repack', this.checked);
+        });
+
+        // Add change listener for new game sources
+        document.getElementById('filter-directforgames').addEventListener('change', function() {
+            filterResults('Direct For Games', this.checked);
+        });
+
+        document.getElementById('filter-wifi4games').addEventListener('change', function() {
+            filterResults('WIFI4Games', this.checked);
+        });
+
+        document.getElementById('filter-downloadcomputergames').addEventListener('change', function() {
+            filterResults('Download Computer Games', this.checked);
+        });
+
+        // Add click listener for each filter group
+        document.querySelectorAll('.filter-group').forEach(group => {
+            group.addEventListener('click', (e) => {
+                const checkbox = group.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+                updateToggleAllButton();
+                e.preventDefault(); // Prevent default behavior
+            });
+        });
+
+        // Prevent text selection on double-click
+        document.querySelectorAll('.filter-label').forEach(label => {
+            label.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+            });
+        });
+
+        // Initialize language
+        let currentLang = 'en';  // Default language is English
+
+        // Function to update text direction based on language
+        function updateTextDirection() {
+            const isRTL = currentLang === 'ar';
+            const searchInput = document.getElementById('searchInput');
+            const resultsGrid = document.querySelector('.results-grid');
+            
+            if (isRTL) {
+                searchInput.style.textAlign = 'right';
+                resultsGrid?.style.setProperty('--grid-template-columns', 'repeat(auto-fill, minmax(300px, 1fr))');
+                searchInput.placeholder = 'ابحث عن الألعاب في جميع المواقع...';
+                document.getElementById('searchButton').textContent = '🔍 ابدأ البحث';
+            } else {
+                searchInput.style.textAlign = 'left';
+                resultsGrid?.style.setProperty('--grid-template-columns', 'repeat(auto-fill, minmax(300px, 1fr))');
+                searchInput.placeholder = 'Search for games across all sites...';
+                document.getElementById('searchButton').textContent = '🔍 Search';
+            }
+            
+            // Update sort select background position
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                sortSelect.style.backgroundPosition = isRTL ? 'left 10px center' : 'right 10px center';
+            }
+        }
+
+        async function loadTranslations() {
+            try {
+                // Update page title
+                document.title = currentLang === 'ar' ? 'بلاي سفير - محرك بحث الألعاب المتقدم' : 'PlaySphere - Advanced Game Search';
+                
+                // Update texts on the page
+                const elements = {
+                    // Main elements
+                    '.site-title': currentLang === 'ar' ? 'بلاي سفير' : 'PlaySphere',
+                    '.site-description': currentLang === 'ar' ? 'ابحث في أكثر من 8 مواقع للألعاب في مكان واحد' : 'Search across 8+ game repositories in one place',
+                    '.search-input': { placeholder: currentLang === 'ar' ? 'ابحث عن الألعاب في جميع المواقع...' : 'Search across all game repositories...' },
+                    '.search-button': currentLang === 'ar' ? '🔍 ابدأ البحث' : '🔍 Start Search',
+                    '.filters-header h3': currentLang === 'ar' ? 'اختر مصادر الألعاب' : 'Select Game Sources',
+                    '#toggleAllFilters': currentLang === 'ar' ? 'إلغاء تحديد الكل' : 'Deselect All',
+                    
+                    // Footer
+                    '.footer-info span:first-child': currentLang === 'ar' ? '© 2025 بلاي سفير' : '© 2025 PlaySphere',
+                    '.footer-info span:nth-child(2)': currentLang === 'ar' ? 'الإصدار 1.0.0' : 'V1.0.0',
+                    '.footer-info span:last-child': currentLang === 'ar' ? 'مدعوم بواسطة DV64' : 'Powered by DV64',
+                    '.footer-links a:first-child': currentLang === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy',
+                    '.footer-links a:nth-child(2)': currentLang === 'ar' ? 'شروط الخدمة' : 'Terms of Service',
+                    
+                    // Loading and results
+                    '.loading-text': currentLang === 'ar' ? 'جاري البحث...' : 'Searching in progress...',
+                    '#resultsCount': currentLang === 'ar' ? '🎮 0 لعبة' : '🎮 0 Games Found',
+                    '#sortSelect option[value="title"]': currentLang === 'ar' ? 'ترتيب حسب العنوان' : 'Sort by Title',
+                    '#sortSelect option[value="source"]': currentLang === 'ar' ? 'ترتيب حسب المصدر' : 'Sort by Source',
+                    '#sortSelect option[value="date"]': currentLang === 'ar' ? 'ترتيب حسب التاريخ' : 'Sort by Date',
+                    
+                    // Privacy policy modal
+                    '.modal-content .modal-title:first-of-type': currentLang === 'ar' ? '🔒 سياسة الخصوصية' : '🔒 Comprehensive Privacy Policy',
+                    '.privacy-section:nth-child(1) h3': currentLang === 'ar' ? 'حماية بياناتك هي أولويتنا' : 'Your Data Protection is Our Priority',
+                    '.privacy-section:nth-child(1) p': currentLang === 'ar' ? 'نلتزم بحماية خصوصيتك وفقًا للمعايير العالمية. تشرح هذه السياسة كيفية جمع واستخدام المعلومات.' : 'We commit to protecting your privacy according to global standards. This policy explains how we collect and use information.',
+                    '.privacy-section:nth-child(2) h3': currentLang === 'ar' ? 'أنواع البيانات التي نجمعها' : 'Types of Data We Collect',
+                    '.privacy-section:nth-child(3) h3': currentLang === 'ar' ? 'إجراءات الأمان المتقدمة' : 'Advanced Security Measures',
+                    
+                    // Terms of service modal
+                    '.modal-content .modal-title:last-of-type': currentLang === 'ar' ? '📜 شروط الخدمة' : '📜 Terms of Service',
+                    '.terms-section:nth-child(1) h3': currentLang === 'ar' ? 'مقدمة عامة' : 'General Introduction',
+                    '.terms-section:nth-child(1) p': currentLang === 'ar' ? 'تشكل هذه الشروط اتفاقية ملزمة بينك ("المستخدم") وبلاي سفير. يرجى القراءة بعناية قبل استخدام خدمتنا.' : 'These terms form a binding agreement between you ("User") and PlaySphere. Please read carefully before using our service.',
+                    '.terms-section:nth-child(2) h3': currentLang === 'ar' ? 'مسؤوليات المستخدم' : 'User Responsibilities',
+                    '.terms-section:nth-child(3) h3': currentLang === 'ar' ? 'حقوق الملكية' : 'Property Rights',
+                    
+                    // Error messages
+                    '.error-state h3': currentLang === 'ar' ? '⚠️ خطأ في البحث' : '⚠️ Search Error',
+                    '.error-state .cors-help': currentLang === 'ar' ? 'نصيحة: تحقق من إعدادات CORS في الخادم' : 'Tip: Check server CORS configuration'
+                };
+
+                // Apply translations
+                for (const [selector, value] of Object.entries(elements)) {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        if (typeof value === 'object') {
+                            for (const [attr, attrValue] of Object.entries(value)) {
+                                element[attr] = attrValue;
+                            }
+                        } else {
+                            element.textContent = value;
+                        }
+                    }
+                }
+
+                // Update filter labels
+                const filterLabels = {
+                    'filter-fitgirl': currentLang === 'ar' ? 'ريباكات فت جيرل' : 'FitGirl',
+                    'filter-gametrex': currentLang === 'ar' ? 'جيم تريكس' : 'GameTrex',
+                    'filter-igg': currentLang === 'ar' ? 'آي جي جي جيمز' : 'IGG Games',
+                    'filter-ocean': currentLang === 'ar' ? 'أوشن أوف جيمز' : 'Ocean Games',
+                    'filter-mechanics': currentLang === 'ar' ? 'ريباكات ميكانيكس' : 'Mechanics',
+                    'filter-pcgames': currentLang === 'ar' ? 'بي سي تورنتس' : 'PC Torrents',
+                    'filter-skidrow': currentLang === 'ar' ? 'سكيدرو' : 'Skidrow',
+                    'filter-myabandonware': currentLang === 'ar' ? 'ماي أباندونوير' : 'My Abandonware',
+                    'filter-megagames': currentLang === 'ar' ? 'ميجا جيمز' : 'MegaGames',
+                    'filter-apunkagames': currentLang === 'ar' ? 'أبونكا جيمز' : 'ApunKaGames',
+                    'filter-blackbox': currentLang === 'ar' ? 'بلاك بوكس ريباك' : 'BlackBox Repack',
+                    'filter-directforgames': currentLang === 'ar' ? 'دايركت فور جيمز' : 'Direct For Games',
+                    'filter-wifi4games': currentLang === 'ar' ? 'واي فاي فور جيمز' : 'WIFI4Games',
+                    'filter-downloadcomputergames': currentLang === 'ar' ? 'داونلود كمبيوتر جيمز' : 'Download Computer Games'
+                };
+
+                for (const [id, label] of Object.entries(filterLabels)) {
+                    const element = document.querySelector(`#${id} + .filter-label`);
+                    if (element) {
+                        element.textContent = label;
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error updating translations:', error);
+            }
+        }
+
+        // Load translations when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Retrieve preferred language from local storage
+            const savedLang = localStorage.getItem('preferredLanguage');
+            if (savedLang) {
+                currentLang = savedLang;
+                const html = document.documentElement;
+                html.setAttribute('lang', currentLang);
+                html.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+                
+                const langBtn = document.querySelector('.language-switch .lang-text');
+                langBtn.textContent = currentLang === 'ar' ? 'English' : 'عربي';
+                
+                document.body.style.fontFamily = currentLang === 'ar' ? 
+                    'Cairo, system-ui, -apple-system, sans-serif' : 
+                    'system-ui, -apple-system, sans-serif';
+            }
+            
+            updateTextDirection();
+            loadTranslations();
+            updateModalContent();
+        });
+
+        // Translation lists for dropdowns
+        const listTranslations = {
+            'privacy-basic-info': {
+                'ar': '<li><strong>المعلومات الأساسية:</strong> الاسم وعنوان البريد الإلكتروني (عند التسجيل).</li><li><strong>المعلومات التقنية:</strong> عنوان IP ونوع المتصفح وإصداره.</li><li><strong>معلومات الاستخدام:</strong> الصفحات التي تمت زيارتها ومدة الجلسة.</li>',
+                'en': '<li><strong>Technical Information:</strong> IP address, browser type, and version.</li><li><strong>Usage Information:</strong> Pages visited and session duration.</li>'
+            },
+            'privacy-data-usage': {
+                'ar': '<li>توفير وتحسين خدماتنا.</li><li>تخصيص تجربتك.</li><li>التواصل معك بشأن التحديثات والعروض.</li><li>ضمان أمان خدماتنا.</li>',
+                'en': '<li>Providing and improving our services.</li><li>Customizing your experience.</li><li>Communicating with you about updates and offers.</li><li>Ensuring the security of our services.</li>'
+            },
+            'privacy-data-security': {
+                'ar': '<li><strong>تشفير شامل:</strong> يتم نقل جميع البيانات عبر قنوات مشفرة باستخدام AES-256.</li><li><strong>جدران الحماية:</strong> نستخدم جدران حماية متطورة لمنع الوصول غير المصرح به.</li><li><strong>مراقبة مستمرة:</strong> نراقب أنظمتنا باستمرار للكشف عن أي تهديدات أمنية.</li>',
+                'en': '<li><strong>Comprehensive Encryption:</strong> All data is transmitted through AES-256 encrypted channels.</li><li><strong>Firewalls:</strong> We use advanced firewalls to prevent unauthorized access.</li><li><strong>Continuous Monitoring:</strong> We continuously monitor our systems for any security threats.</li>'
+            },
+            'privacy-data-sharing': {
+                'ar': '<li>عندما يكون ذلك مطلوباً بموجب القانون.</li><li>لحماية حقوقنا وسلامتنا.</li><li>مع مقدمي الخدمات الموثوق بهم الذين يساعدوننا في تشغيل خدماتنا.</li>',
+                'en': '<li>When required by law.</li><li>To protect our rights and safety.</li><li>With trusted service providers who help us operate our services.</li>'
+            },
+            'privacy-user-rights': {
+                'ar': '<li>الوصول إلى معلوماتك الشخصية.</li><li>تصحيح معلوماتك الشخصية.</li><li>حذف معلوماتك الشخصية.</li><li>تقييد معالجة معلوماتك الشخصية.</li><li>الاعتراض على معالجة معلوماتك الشخصية.</li><li>نقل معلوماتك الشخصية.</li>',
+                'en': '<li>Access your personal information.</li><li>Correct your personal information.</li><li>Delete your personal information.</li><li>Restrict processing of your personal information.</li><li>Object to processing of your personal information.</li><li>Transfer your personal information.</li>'
+            },
+            'terms-user-responsibilities': {
+                'ar': '<li>استخدام المحتوى الذي نوفره للأغراض الشخصية وغير التجارية فقط.</li><li>الامتثال لجميع القوانين المحلية والدولية المعمول بها.</li><li>عدم استخدام خدمتنا بأي طريقة قد تضر أو تعطل أو تفرط في تحميل خوادمنا أو شبكاتنا.</li><li>عدم محاولة الوصول غير المصرح به إلى أي جزء من خدمتنا أو إلى أي أنظمة أو شبكات أخرى متصلة بخدمتنا.</li>',
+                'en': '<li>Use the content we provide for personal and non-commercial purposes only.</li><li>Comply with all applicable local and international laws.</li><li>Do not use our service in any way that could harm, disable, or overburden our servers or networks.</li><li>Do not attempt unauthorized access to any part of our service or any other systems or networks connected to our service.</li>'
+            }
+        };
+
+        // Function to update modal content based on language
+        function updateModalContent() {
+            // Update elements with data-ar and data-en attributes
+            document.querySelectorAll('[data-ar][data-en]').forEach(element => {
+                const arText = element.getAttribute('data-ar');
+                const enText = element.getAttribute('data-en');
+                element.textContent = currentLang === 'ar' ? arText : enText;
+            });
+
+            // Update translatable paragraphs
+            document.querySelectorAll('.translatable').forEach(element => {
+                const arText = element.getAttribute('data-ar');
+                const enText = element.getAttribute('data-en');
+                if (arText && enText) {
+                    element.innerHTML = currentLang === 'ar' ? arText : enText;
+                }
+            });
+
+            // Update translatable lists
+            document.querySelectorAll('.translatable-list').forEach(element => {
+                const listId = element.getAttribute('data-list-id');
+                if (listId && listTranslations[listId]) {
+                    element.innerHTML = listTranslations[listId][currentLang];
+                }
+            });
+
+        }
+    </script>
+</body>
+</html>

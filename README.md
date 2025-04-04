@@ -2,7 +2,7 @@
 
 <div align="center">
   <br>
-  <p><strong>Advanced Game Search Engine/strong></p>
+  <p><strong>Advanced Game Search Engine</strong></p>
 </div>
 
 ---
